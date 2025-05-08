@@ -10,14 +10,21 @@ import productRouter from "./product/product-routes.js";
 import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
 import { swaggerOptions } from "./swagger/swagger.js";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = 4000;
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
+const corsOption = {
+  origin: true,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+};
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use(cors(corsOption));
 app.use(express.json());
 app.use("/admins", adminRouter);
 app.use("/couriers", courierRouter);
@@ -28,5 +35,5 @@ app.use("/products", productRouter);
 app.use("/deliveries", deliveryRouter);
 
 app.listen(PORT, () => {
-  console.log("Server is running on port ", PORT);
+  console.log("Server is running on port", PORT);
 });

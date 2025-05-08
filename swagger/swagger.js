@@ -18,6 +18,7 @@ export const swaggerOptions = {
     "./customer/*.js",
     "./vendor/*.js",
     "./order/*.js",
+    "./product/*.js",
     "./delivery/*.js",
   ],
 };
