@@ -1,98 +1,111 @@
-import Vendor from "./vendor.js";
+import { PrismaClient } from "../generated/prisma/index.js";
+
+const prisma = new PrismaClient();
 
 class VendorController {
-  constructor() {
-    this.vendors = [
-      new Vendor(
-        1,
-        "John",
-        "Doe",
-        "john@example.com",
-        "password",
-        "admin",
-        "1234567890",
-        "123 Main St",
-        "active"
-      ),
-      new Vendor(
-        2,
-        "Jane",
-        "Doe",
-        "jane@example.com",
-        "password",
-        "admin",
-        "0987654321",
-        "456 Main St",
-        "active"
-      ),
-      new Vendor(
-        3,
-        "Bob",
-        "Smith",
-        "bob@example.com",
-        "password",
-        "admin",
-        "1112223333",
-        "789 Main St",
-        "active"
-      ),
-      new Vendor(
-        4,
-        "Alice",
-        "Johnson",
-        "alice@example.com",
-        "password",
-        "admin",
-        "4445556666",
-        "101 Main St",
-        "active"
-      ),
-      new Vendor(
-        5,
-        "Tom",
-        "Jones",
-        "tom@example.com",
-        "password",
-        "admin",
-        "7778889999",
-        "222 Main St",
-        "active"
-      ),
-    ];
-  }
-  getVendors() {
-    return this.vendors;
-  }
-  getVendorById(id) {
-    const vendor = this.vendors.find((vendor) => vendor._id === parseInt(id));
-    if (!vendor) {
-      throw new Error("Vendor not found");
+  constructor() {}
+
+  async getVendors() {
+    try {
+      return await prisma.vendor.findMany();
+    } catch (error) {
+      console.error("Error getting vendors:", error);
+      throw error;
     }
-    return vendor;
   }
 
-  saveVendor(vendor) {
-    this.vendors.push(vendor);
-    return vendor;
-  }
-  updateVendor(id, updatedVendor) {
-    const index = this.vendors.findIndex(
-      (vendor) => vendor._id === parseInt(id)
-    );
-    if (index === -1) {
-      throw new Error("Vendor not found");
+  async getVendorById(id) {
+    try {
+      const vendor = await prisma.vendor.findUnique({
+        where: { id: parseInt(id) },
+      });
+
+      if (!vendor) {
+        throw new Error("Vendor not found");
+      }
+
+      return vendor;
+    } catch (error) {
+      console.error("Error getting vendor by ID:", error);
+      throw error;
     }
-    this.vendors[index] = { ...this.vendors[index], ...updatedVendor };
-    return this.vendors[index];
   }
-  deleteVendor(id) {
-    const index = this.vendors.findIndex(
-      (vendor) => vendor._id === parseInt(id)
-    );
-    if (index === -1) {
-      throw new Error("Vendor not found");
+
+  async saveVendor(vendorData) {
+    try {
+      const newVendor = await prisma.vendor.create({
+        data: {
+          firstName: vendorData.firstName,
+          lastName: vendorData.lastName,
+          email: vendorData.email,
+          password: vendorData.password,
+          role: vendorData.role,
+          contactNumber: vendorData.contactNumber,
+          address: vendorData.address,
+          status: vendorData.status,
+        },
+      });
+
+      return newVendor;
+    } catch (error) {
+      console.error("Error saving vendor:", error);
+      throw error;
     }
-    this.vendors.splice(index, 1);
+  }
+
+  async updateVendor(id, updatedVendorData) {
+    try {
+      const index = parseInt(id);
+
+      const existingVendor = await prisma.vendor.findUnique({
+        where: { id: index },
+      });
+
+      if (!existingVendor) {
+        throw new Error("Vendor not found");
+      }
+
+      const updatedVendor = await prisma.vendor.update({
+        where: { id: index },
+        data: {
+          firstName: updatedVendorData.firstName || existingVendor.firstName,
+          lastName: updatedVendorData.lastName || existingVendor.lastName,
+          email: updatedVendorData.email || existingVendor.email,
+          password: updatedVendorData.password || existingVendor.password,
+          role: updatedVendorData.role || existingVendor.role,
+          contactNumber:
+            updatedVendorData.contactNumber || existingVendor.contactNumber,
+          address: updatedVendorData.address || existingVendor.address,
+          status: updatedVendorData.status || existingVendor.status,
+        },
+      });
+
+      return updatedVendor;
+    } catch (error) {
+      console.error("Error updating vendor:", error);
+      throw error;
+    }
+  }
+
+  async deleteVendor(id) {
+    try {
+      const index = parseInt(id);
+
+      const existingVendor = await prisma.vendor.findUnique({
+        where: { id: index },
+      });
+
+      if (!existingVendor) {
+        throw new Error("Vendor not found");
+      }
+
+      await prisma.vendor.delete({
+        where: { id: index },
+      });
+    } catch (error) {
+      console.error("Error deleting vendor:", error);
+      throw error;
+    }
   }
 }
 

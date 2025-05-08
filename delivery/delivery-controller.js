@@ -1,33 +1,76 @@
-import Delivery from "./delivery.js";
+import { PrismaClient } from "../generated/prisma/index.js";
+
+const prisma = new PrismaClient();
 
 class DeliveryController {
-  constructor() {
-    this.deliveries = [
-      new Delivery(1, 1, "2023-05-24", "pending"),
-      new Delivery(2, 2, "2023-05-24", "completed"),
-      new Delivery(3, 3, "2023-05-24", "pending"),
-    ];
-  }
-  getDeliveries() {
-    return this.deliveries;
-  }
-  getDeliveryById(id) {
-    return this.deliveries.find((delivery) => delivery._id === id);
-  }
-  addDelivery(delivery) {
-    this.deliveries.push(delivery);
-  }
-  updateDelivery(id, updatedDelivery) {
-    const index = this.deliveries.findIndex((delivery) => delivery._id === id);
-    if (index !== -1) {
-      this.deliveries[index] = updatedDelivery;
+  constructor() {}
+
+  async getDeliveries() {
+    try {
+      return await prisma.delivery.findMany();
+    } catch (error) {
+      console.error("Error getting deliveries:", error);
+      throw error;
     }
   }
-  deleteDelivery(id) {
-    const index = this.deliveries.findIndex((delivery) => delivery._id === id);
-    if (index !== -1) {
-      this.deliveries.splice(index, 1);
+
+  async getDeliveryById(id) {
+    try {
+      const numId = parseInt(id);
+      return await prisma.delivery.findUnique({
+        where: { id: numId },
+      });
+    } catch (error) {
+      console.error("Error getting delivery by ID:", error);
+      throw error;
+    }
+  }
+
+  async addDelivery(deliveryData) {
+    try {
+      return await prisma.delivery.create({
+        data: {
+          orderId: deliveryData.orderId,
+          deliveryDate: new Date(deliveryData.deliveryDate),
+          status: deliveryData.status,
+          courierId: deliveryData.courierId,
+        },
+      });
+    } catch (error) {
+      console.error("Error adding delivery:", error);
+      throw error;
+    }
+  }
+
+  async updateDelivery(id, updatedDeliveryData) {
+    try {
+      const numId = parseInt(id);
+      return await prisma.delivery.update({
+        where: { id: numId },
+        data: {
+          orderId: updatedDeliveryData.orderId,
+          deliveryDate: new Date(updatedDeliveryData.deliveryDate),
+          status: updatedDeliveryData.status,
+          courierId: updatedDeliveryData.courierId,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating delivery:", error);
+      throw error;
+    }
+  }
+
+  async deleteDelivery(id) {
+    try {
+      const numId = parseInt(id);
+      await prisma.delivery.delete({
+        where: { id: numId },
+      });
+    } catch (error) {
+      console.error("Error deleting delivery:", error);
+      throw error;
     }
   }
 }
+
 export default DeliveryController;

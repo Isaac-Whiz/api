@@ -1,82 +1,80 @@
-import Administrator from "./administrator.js";
+import { PrismaClient } from "../generated/prisma/index.js";
+
+const prisma = new PrismaClient();
 
 class AdministratorController {
-  constructor() {
-    this.administrators = [
-      new Administrator(
-        1,
-        "John",
-        "Doe",
-        "john@example.com",
-        "password",
-        "admin",
-        "IT"
-      ),
-      new Administrator(
-        2,
-        "Jane",
-        "Doe",
-        "jane@example.com",
-        "password",
-        "admin",
-        "HR"
-      ),
-      new Administrator(
-        3,
-        "Bob",
-        "Smith",
-        "bob@example.com",
-        "password",
-        "admin",
-        "Finance"
-      ),
-      new Administrator(
-        4,
-        "Alice",
-        "Johnson",
-        "alice@example.com",
-        "password",
-        "admin",
-        "Marketing"
-      ),
-      new Administrator(
-        5,
-        "Mike",
-        "Brown",
-        "mike@example.com",
-        "password",
-        "admin",
-        "Operations"
-      ),
-    ];
-  }
+  constructor() {}
 
-  saveAdministrator(administrator) {
-    this.administrators.push(administrator);
-  }
-  getAdministratorById(id) {
-    const numId = parseInt(id);
-    return this.administrators.find(
-      (administrator) => administrator._id === numId
-    );
-  }
-  deleteAdministrator(id) {
-    const numId = this.#parseParam(id);
-    this.administrators = this.administrators.filter(
-      (administrator) => administrator._id !== numId
-    );
-  }
-  updateAdministrator(id, updatedAdministrator) {
-    const numId = this.#parseParam(id);
-    const index = this.administrators.findIndex(
-      (administrator) => administrator._id === numId
-    );
-    if (index !== -1) {
-      this.administrators[index] = updatedAdministrator;
+  async saveAdministrator(administratorData) {
+    try {
+      const newAdministrator = await prisma.administrator.create({
+        data: {
+          firstName: administratorData.firstName,
+          lastName: administratorData.lastName,
+          email: administratorData.email,
+          password: administratorData.password,
+          role: administratorData.role,
+          department: administratorData.department,
+        },
+      });
+      return newAdministrator;
+    } catch (error) {
+      console.error("Error saving administrator:", error);
+      throw error;
     }
   }
-  getAdministrators() {
-    return this.administrators;
+
+  async getAdministratorById(id) {
+    try {
+      const numId = parseInt(id);
+      return await prisma.administrator.findUnique({
+        where: { id: numId },
+      });
+    } catch (error) {
+      console.error("Error getting administrator by ID:", error);
+      throw error;
+    }
+  }
+
+  async deleteAdministrator(id) {
+    try {
+      const numId = this.#parseParam(id);
+      await prisma.administrator.delete({
+        where: { id: numId },
+      });
+    } catch (error) {
+      console.error("Error deleting administrator:", error);
+      throw error;
+    }
+  }
+
+  async updateAdministrator(id, updatedAdministratorData) {
+    try {
+      const numId = this.#parseParam(id);
+      return await prisma.administrator.update({
+        where: { id: numId },
+        data: {
+          firstName: updatedAdministratorData.firstName,
+          lastName: updatedAdministratorData.lastName,
+          email: updatedAdministratorData.email,
+          password: updatedAdministratorData.password,
+          role: updatedAdministratorData.role,
+          department: updatedAdministratorData.department,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating administrator:", error);
+      throw error;
+    }
+  }
+
+  async getAdministrators() {
+    try {
+      return await prisma.administrator.findMany();
+    } catch (error) {
+      console.error("Error getting all administrators:", error);
+      throw error;
+    }
   }
 
   #parseParam(param) {

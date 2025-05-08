@@ -1,61 +1,76 @@
-import Courier from "./courier.js";
+import { PrismaClient } from "../generated/prisma/index.js";
+
+const prisma = new PrismaClient();
 
 class CourierController {
-  constructor() {
-    this.couriers = [
-      new Courier(
-        1,
-        "John",
-        "Doe",
-        "john.doe@example.com",
-        "password123",
-        "courier",
-        "available"
-      ),
-      new Courier(
-        2,
-        "Jane",
-        "Smith",
-        "jane.smith@example.com",
-        "password456",
-        "courier",
-        "busy"
-      ),
-      new Courier(
-        3,
-        "Bob",
-        "Johnson",
-        "bob.johnson@example.com",
-        "password789",
-        "courier",
-        "available"
-      ),
-    ];
-  }
+  constructor() {}
 
-  getCouriers() {
-    return this.couriers;
-  }
-  getCourierById(id) {
-    return this.couriers.find((courier) => courier._id === this.#parseId(id));
-  }
-  saveCourier(courier) {
-    this.couriers.push(courier);
-  }
-  updateCourier(id, updatedCourier) {
-    const index = this.couriers.findIndex(
-      (courier) => courier._id === this.#parseId(id)
-    );
-    if (index !== -1) {
-      this.couriers[index] = updatedCourier;
+  async getCouriers() {
+    try {
+      return await prisma.courier.findMany();
+    } catch (error) {
+      console.error("Error getting couriers:", error);
+      throw error;
     }
   }
-  deleteCourier(id) {
-    const index = this.couriers.findIndex(
-      (courier) => courier._id === this.#parseId(id)
-    );
-    if (index !== -1) {
-      this.couriers.splice(index, 1);
+
+  async getCourierById(id) {
+    try {
+      return await prisma.courier.findUnique({
+        where: { id: this.#parseId(id) },
+      });
+    } catch (error) {
+      console.error("Error getting courier by ID:", error);
+      throw error;
+    }
+  }
+
+  async saveCourier(courierData) {
+    try {
+      const newCourier = await prisma.courier.create({
+        data: {
+          firstName: courierData.firstName,
+          lastName: courierData.lastName,
+          email: courierData.email,
+          password: courierData.password,
+          role: courierData.role,
+          status: courierData.status,
+        },
+      });
+      return newCourier;
+    } catch (error) {
+      console.error("Error saving courier:", error);
+      throw error;
+    }
+  }
+
+  async updateCourier(id, updatedCourierData) {
+    try {
+      return await prisma.courier.update({
+        where: { id: this.#parseId(id) },
+        data: {
+          firstName: updatedCourierData.firstName,
+          lastName: updatedCourierData.lastName,
+          email: updatedCourierData.email,
+          password: updatedCourierData.password,
+          role: updatedCourierData.role,
+          status: updatedCourierData.status,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating courier:", error);
+      throw error;
+    }
+  }
+
+  async deleteCourier(id) {
+    try {
+      await prisma.courier.delete({
+        where: { id: this.#parseId(id) },
+      });
+    } catch (error) {
+      console.error("Error deleting courier:", error);
+      throw error;
     }
   }
 
