@@ -1,4 +1,5 @@
 import express from "express";
+import dotenv from "dotenv";
 import adminRouter from "./administrator/admin-routes.js";
 import courierRouter from "./courier/courier-routes.js";
 import customerRouter from "./customer/customer-routes.js";
@@ -10,7 +11,9 @@ import swaggerUi from "swagger-ui-express";
 import swaggerJSDoc from "swagger-jsdoc";
 import { swaggerOptions } from "./swagger/swagger.js";
 
+dotenv.config();
 const app = express();
+const PORT = process.env.PORT || 4000;
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
@@ -24,6 +27,6 @@ app.use("/orders", orderRouter);
 app.use("/products", productRouter);
 app.use("/deliveries", deliveryRouter);
 
-app.listen(4000, () => {
-  console.log("Server is running on port 4000");
+app.listen(PORT, () => {
+  console.log("Server is running on port ", PORT);
 });
